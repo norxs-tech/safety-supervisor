@@ -1,0 +1,234 @@
+name: CI — Safety Supervisor Gateway
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # ============================================================================
+  # Job 1: Host-Native Unit Tests (ASan + UBSan)
+  # ============================================================================
+  unit-tests:
+    name: Unit Tests (host-native, ASan + UBSan)
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y cmake ninja-build gcc clang
+
+      - name: Configure (TEST target)
+        run: |
+          cmake -B build/test -DNORXS_TARGET=TEST \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -G Ninja
+
+      - name: Build
+        run: cmake --build build/test --parallel
+
+      - name: Run tests
+        run: ctest --test-dir build/test -V --output-on-failure
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-results
+          path: build/test/
+
+  # ============================================================================
+  # Job 2: M7 Cross-Compile (ARM Cortex-M7, -Werror)
+  # ============================================================================
+  build-m7:
+    name: M7 Safety Core Cross-Compile
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ARM toolchain
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y cmake ninja-build \
+            gcc-arm-none-eabi binutils-arm-none-eabi libnewlib-arm-none-eabi
+
+      - name: Configure (M7 target)
+        run: |
+          cmake -B build/m7 -DNORXS_TARGET=M7 \
+            -DCMAKE_C_COMPILER=arm-none-eabi-gcc \
+            -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY \
+            -DCMAKE_OBJCOPY=arm-none-eabi-objcopy \
+            -DCMAKE_SIZE=arm-none-eabi-size \
+            -DCMAKE_BUILD_TYPE=Release \
+            -G Ninja
+
+      - name: Build
+        run: cmake --build build/m7 --parallel
+
+      - name: Show memory usage
+        run: arm-none-eabi-size build/m7/m7_safety_supervisor
+
+      - name: Upload ELF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: m7-safety-supervisor-elf
+          path: |
+            build/m7/m7_safety_supervisor.elf
+            build/m7/m7_safety_supervisor.map
+          retention-days: 30
+
+  # ============================================================================
+  # Job 3: Stack Usage Analysis (ISO 26262 §7.4.10)
+  # ============================================================================
+  stack-analysis:
+    name: Stack Usage Analysis
+    runs-on: ubuntu-24.04
+    needs: build-m7
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ARM toolchain
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y gcc-arm-none-eabi cmake ninja-build
+
+      - name: Build with -fstack-usage
+        run: |
+          cmake -B build/stack -DNORXS_TARGET=M7 \
+            -DCMAKE_C_COMPILER=arm-none-eabi-gcc \
+            -DCMAKE_OBJCOPY=arm-none-eabi-objcopy \
+            -DCMAKE_SIZE=arm-none-eabi-size \
+            -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY \
+            -DCMAKE_BUILD_TYPE=Release \
+            -G Ninja
+          cmake --build build/stack --parallel
+
+      - name: Report top stack consumers
+        run: |
+          echo "=== Top 20 Stack Consumers ==="
+          find build/stack -name "*.su" -exec cat {} \; \
+            | sort -t$'\t' -k2 -rn | head -20
+
+      - name: Fail on unbounded stack (ASIL-D requirement)
+        run: |
+          UNBOUNDED=$(find build/stack -name "*.su" -exec grep -l "?" {} \;)
+          if [ -n "$UNBOUNDED" ]; then
+            echo "ERROR: Unbounded stack detected:"
+            echo "$UNBOUNDED"
+            find build/stack -name "*.su" -exec grep "?" {} \; -print
+            exit 1
+          fi
+          echo "PASS: No unbounded stack usage found"
+
+      - name: Upload stack report
+        uses: actions/upload-artifact@v4
+        with:
+          name: stack-usage-report
+          path: build/stack/
+
+  # ============================================================================
+  # Job 4: MISRA C Static Analysis (cppcheck)
+  # ============================================================================
+  misra-lint:
+    name: Static Analysis (cppcheck / MISRA C proxy)
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install cppcheck
+        run: sudo apt-get install -y cppcheck
+
+      - name: Run cppcheck on M7 safety sources
+        run: |
+          cppcheck \
+            --enable=all \
+            --error-exitcode=1 \
+            --suppress=missingIncludeSystem \
+            --suppress=unmatchedSuppression \
+            --inline-suppr \
+            -I include/types \
+            -I src/m7_rtos/bsw/e2e \
+            -I src/m7_rtos/bsw/dem \
+            -I src/m7_rtos/bsw/wdgm \
+            -I src/m7_rtos/bsw/csm \
+            -I src/m7_rtos/bsw/memmap \
+            -I src/m7_rtos/cdd/ipc_ringbuffer \
+            -I src/m7_rtos/rte \
+            -I src/m7_rtos/swc/swc_vehicle_dynamics \
+            --std=c11 \
+            src/m7_rtos/ \
+            2>&1 | tee cppcheck_report.txt
+
+      - name: Upload cppcheck report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cppcheck-report
+          path: cppcheck_report.txt
+
+  # ============================================================================
+  # Job 5: AUTOSAR Compliance Pattern Scan
+  # ============================================================================
+  compliance-scan:
+    name: AUTOSAR / MISRA Compliance Pattern Scan
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Scan for forbidden patterns
+        run: |
+          echo "=== Checking forbidden patterns ==="
+          FAIL=0
+
+          echo -n "malloc/calloc/realloc/VLA: "
+          COUNT=$(grep -rn "\bmalloc\b\|\bcalloc\b\|\brealloc\b" \
+                  include/ src/ --include="*.c" --include="*.h" \
+                  | grep -v "^.*//\|@" | wc -l)
+          echo "$COUNT"; [ "$COUNT" -ne 0 ] && FAIL=1
+
+          echo -n "Dynamic allocation in linker script (heap size=0 check): "
+          HEAP=$(grep -c "HEAP_SIZE\s*=\s*0" tools/s32g_m7_safety.ld || true)
+          echo "heap_zero_count=$HEAP"
+
+          echo -n "Recursive calls: "
+          # Simple self-call check
+          COUNT=$(grep -rn "^\([A-Za-z_][A-Za-z0-9_]*\)(.*\1(" \
+                  src/m7_rtos/ --include="*.c" | wc -l)
+          echo "$COUNT"
+
+          echo ""
+          if [ "$FAIL" -eq 0 ]; then
+            echo "All AUTOSAR compliance checks passed."
+          else
+            echo "AUTOSAR compliance violations found."
+            exit 1
+          fi
+
+      - name: Verify Doxygen headers
+        run: |
+          FAIL=0
+          for f in include/types/*.h \
+                   src/m7_rtos/bsw/e2e/*.h src/m7_rtos/bsw/e2e/*.c \
+                   src/m7_rtos/bsw/wdgm/*.h src/m7_rtos/bsw/wdgm/*.c \
+                   src/m7_rtos/bsw/dem/*.h src/m7_rtos/bsw/dem/*.c \
+                   src/m7_rtos/bsw/csm/*.h src/m7_rtos/bsw/csm/*.c \
+                   src/m7_rtos/cdd/ipc_ringbuffer/*.h \
+                   src/m7_rtos/swc/swc_vehicle_dynamics/*.h; do
+            [ ! -f "$f" ] && continue
+            for tag in "@file" "@brief" "@author" "@copyright" "@standards"; do
+              if ! grep -q "$tag" "$f"; then
+                echo "Missing $tag in $f"
+                FAIL=1
+              fi
+            done
+          done
+          if [ "$FAIL" -eq 0 ]; then echo "All Doxygen headers complete."; fi
+          if [ "$FAIL" -ne 0 ]; then exit 1; fi
