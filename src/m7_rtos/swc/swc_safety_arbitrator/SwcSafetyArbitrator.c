@@ -279,7 +279,6 @@ void Rte_Runnable_SafetyArbitrator_10ms(void)
     Rte_AiCommandType            aiCmd;
     Rte_VehicleDynamicsStateType dynState;
     Rte_SafetyArbitratorOutputType output;
-    Rte_SafeStateCommandType       ssCmd;
 
     float32 steerMax_deg;
     float32 yawRateMax_radps;

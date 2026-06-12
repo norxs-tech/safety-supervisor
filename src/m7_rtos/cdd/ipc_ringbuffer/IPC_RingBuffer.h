@@ -124,4 +124,17 @@ extern IPC_ReturnType IPC_RingBuffer_Read(
  */
 extern uint32 IPC_RingBuffer_GetCount(uint8 Channel);
 
+/**
+ * @brief  Apply E2E Profile 22 protection to a frame before writing.
+ *         Computes the E2E_CRC / E2E_Counter fields using the channel's internal
+ *         E2E configuration so that the consumer-side check in IPC_RingBuffer_Read
+ *         passes. Must be called by the producer once per frame, before Write.
+ * @param  Channel  [in]  Channel index (selects the per-channel protect state).
+ * @param  Frame    [io]  Frame whose E2E fields will be populated.
+ * @return IPC_OK on success, IPC_E_PARAM if invalid.
+ */
+extern IPC_ReturnType IPC_RingBuffer_ProtectFrame(
+    uint8                 Channel,
+    IPC_FrameType * const Frame);
+
 #endif /* IPC_RINGBUFFER_H */

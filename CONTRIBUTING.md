@@ -149,3 +149,23 @@ For questions beyond the scope of a GitHub issue, contact norxs Technology LLC
 ---
 
 *norxs Technology LLC — Safety Engineering, Built from the Ground Up.*
+
+---
+
+## Security Issues
+
+**Never report security vulnerabilities through public GitHub issues or pull
+requests.** Follow the coordinated disclosure process in [SECURITY.md](SECURITY.md)
+(contact@norxs.com, subject prefix `[SECURITY]`).
+
+## License Compliance for Contributions (ISO/IEC 5230)
+
+- Contributions must be your original work; third-party code (including
+  copy-pasted snippets) is not accepted into this repository — it has a
+  zero-third-party-dependency policy verified by the SBOM gate in CI.
+- Every new `.c`/`.h` file must carry the standard norxs Doxygen header
+  (`@file`, `@brief`, `@author`, `@copyright`, `@standards`) — enforced by the
+  `compliance-scan` CI job.
+- After adding, removing, or modifying files, regenerate the SBOM and commit it:
+  `python3 tools/generate_sbom.py 0.9.1` — the `supply-chain-compliance` CI job
+  fails if any repository file is missing from the SBOM.

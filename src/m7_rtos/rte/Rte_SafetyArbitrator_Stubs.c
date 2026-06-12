@@ -75,15 +75,15 @@ static volatile Rte_ModeType_SafetyMode       Rte_CurrentSafetyMode;
 Std_ReturnType Rte_Read_SafetyArbitrator_AiCommand_Data(
     Rte_AiCommandType * const data)
 {
-    Std_ReturnType retVal = E_NOT_OK;
-    uint8          byteIdx;
-    const uint8   *srcBytes;
-    uint8         *dstBytes;
+    Std_ReturnType        retVal = E_NOT_OK;
+    uint8                 byteIdx;
+    volatile const uint8 *srcBytes;
+    uint8                *dstBytes;
 
     if (data != NULL_PTR)
     {
         /* Byte-by-byte read from volatile IRV (no memcpy on volatile per MISRA C:2023) */
-        srcBytes = (const uint8 *)&Rte_IRV_AiCommand;
+        srcBytes = (volatile const uint8 *)&Rte_IRV_AiCommand;
         dstBytes = (uint8 *)data;
         for (byteIdx = 0U; byteIdx < (uint8)sizeof(Rte_AiCommandType); byteIdx++)
         {
@@ -101,14 +101,14 @@ Std_ReturnType Rte_Read_SafetyArbitrator_AiCommand_Data(
 Std_ReturnType Rte_Read_SafetyArbitrator_VehicleDynamics_Data(
     Rte_VehicleDynamicsStateType * const data)
 {
-    Std_ReturnType retVal = E_NOT_OK;
-    uint8          byteIdx;
-    const uint8   *srcBytes;
-    uint8         *dstBytes;
+    Std_ReturnType        retVal = E_NOT_OK;
+    uint8                 byteIdx;
+    volatile const uint8 *srcBytes;
+    uint8                *dstBytes;
 
     if (data != NULL_PTR)
     {
-        srcBytes = (const uint8 *)&Rte_IRV_VehicleDynamicsState;
+        srcBytes = (volatile const uint8 *)&Rte_IRV_VehicleDynamicsState;
         dstBytes = (uint8 *)data;
         for (byteIdx = 0U; byteIdx < (uint8)sizeof(Rte_VehicleDynamicsStateType); byteIdx++)
         {
@@ -204,14 +204,14 @@ Std_ReturnType Rte_Write_SafetyArbitrator_VehicleDynamics_Data(
 Std_ReturnType Rte_IRead_SafetyArbitrator_ArbitrationResult(
     Rte_SafetyArbitratorOutputType * const data)
 {
-    Std_ReturnType retVal = E_NOT_OK;
-    uint8          byteIdx;
-    const uint8   *srcBytes;
-    uint8         *dstBytes;
+    Std_ReturnType        retVal = E_NOT_OK;
+    uint8                 byteIdx;
+    volatile const uint8 *srcBytes;
+    uint8                *dstBytes;
 
     if (data != NULL_PTR)
     {
-        srcBytes = (const uint8 *)&Rte_IRV_ArbitrationResult;
+        srcBytes = (volatile const uint8 *)&Rte_IRV_ArbitrationResult;
         dstBytes = (uint8 *)data;
         for (byteIdx = 0U;
              byteIdx < (uint8)sizeof(Rte_SafetyArbitratorOutputType);

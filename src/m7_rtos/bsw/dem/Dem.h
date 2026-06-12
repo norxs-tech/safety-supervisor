@@ -63,6 +63,10 @@ typedef uint16 Dem_EventIdType;
 #define DEM_EVENT_CSM_MAC_VERIFICATION_FAIL   ((Dem_EventIdType)0xC501U)
 #define DEM_EVENT_CSM_KEY_EXPIRED             ((Dem_EventIdType)0xC502U)
 
+/* OS / Platform Events */
+#define DEM_EVENT_OS_TASK_OVERRUN             ((Dem_EventIdType)0xC601U)
+#define DEM_EVENT_SBST_FAILURE                ((Dem_EventIdType)0xC602U)
+
 /*=====================================================================================
  * DEM Freeze Frame Data — captured at moment of first failure
  *====================================================================================*/
@@ -116,5 +120,17 @@ extern Std_ReturnType Dem_SetFreezeFrameData(
 extern Std_ReturnType Dem_ReportErrorStatus(
     Dem_EventIdType     EventId,
     Dem_EventStatusType EventStatus);
+
+/**
+ * @brief  Read the ISO 14229-1 §11.2.1 composite UDS status byte of an event.
+ *         Supports UDS service $19 (ReadDTCInformation) and host-native unit tests.
+ * @param  EventId      [in]  DEM event identifier.
+ * @param  UdsStatus    [out] Composite UDS statusOfDTC byte.
+ * @return E_OK on success, E_NOT_OK if EventId unknown or UdsStatus is NULL.
+ * @req    SWS_Dem_00915
+ */
+extern Std_ReturnType Dem_GetEventUdsStatus(
+    Dem_EventIdType   EventId,
+    uint8     * const UdsStatus);
 
 #endif /* DEM_H */

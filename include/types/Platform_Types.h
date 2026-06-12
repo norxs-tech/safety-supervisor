@@ -100,8 +100,8 @@ typedef struct
 
 #define ASIL_D_SET(name, value)          \
     do {                                 \
-        (name)     = (value);            \
-        (name##_inv) = ~(value);         \
+        (name)       = (value);          \
+        (name##_inv) = ~(name);          \
     } while (0)
 
 #define ASIL_D_CHECK(name)               \

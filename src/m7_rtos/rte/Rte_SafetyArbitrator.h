@@ -138,4 +138,15 @@ extern void Rte_Runnable_SafetyArbitrator_Diag_100ms(void);
 /** @brief Safety Arbitrator init runnable — called once at ECU init */
 extern void Rte_Runnable_SafetyArbitrator_Init(void);
 
+/*=====================================================================================
+ * RTE Sender Ports — published by other SWCs / CDD towards Safety Arbitrator
+ *====================================================================================*/
+
+/** @brief Vehicle Dynamics SWC publishes fused dynamic state to Safety Arbitrator */
+extern Std_ReturnType Rte_Write_SafetyArbitrator_VehicleDynamics_Data(
+    const Rte_VehicleDynamicsStateType * const data);
+
+/** @brief IPC handler publishes received (E2E-validated) AI command into the RTE */
+extern void Rte_UpdateAiCommandFromIpc(const Rte_AiCommandType * const aiCmd);
+
 #endif /* RTE_SAFETYARBITRATOR_H */

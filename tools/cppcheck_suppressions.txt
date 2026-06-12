@@ -1,0 +1,54 @@
+// =====================================================================================
+// cppcheck suppression list — norxs Autonomous Safety-Supervisor Gateway (SEooC)
+//
+// Each suppression is a documented deviation. Findings of severity `error` and
+// `warning` are NEVER suppressed here — they must be fixed in code. Only `style`
+// and `information` level findings with an engineering justification are listed.
+//
+// Deviation record format per MISRA Compliance:2020 §6.
+// =====================================================================================
+
+// DEV-001 — variableScope (style)
+// Justification: Variables are intentionally declared at function scope, at the top
+// of the function body, per the norxs coding standard derived from MISRA C:2023
+// "declarations at block start" convention used across all BSW/SWC modules.
+// Reducing scope per cppcheck's suggestion would fragment declarations across
+// nested blocks and conflict with the reviewed coding style. Risk: none (no
+// functional impact; lifetime is a superset of the suggested scope).
+variableScope
+
+// DEV-002 — unusedFunction (style)
+// Justification: This repository is a Safety Element out of Context (SEooC).
+// Public BSW/SWC APIs (e.g. OTA_GetCurrentBankStatus, Rte mode services) are
+// invoked by the integrator's application or by the companion A53 repository,
+// not necessarily inside this compilation unit set. unusedFunction is not a
+// meaningful check for a library/SEooC deliverable.
+unusedFunction
+
+// DEV-003 — unusedStructMember (style)
+// Justification: Struct layouts mirror NXP HSE service descriptors and hardware
+// register frames. "Unused" members are reserved fields required to preserve
+// the exact memory layout mandated by the HSE firmware interface specification.
+unusedStructMember
+
+// DEV-004 — toomanyconfigs (information)
+// Justification: Preprocessor configuration space stems from AUTOSAR MemMap
+// section pragmas (one #ifdef block per memory section, by design). All shipped
+// configurations are covered by the CI matrix (host TEST + M7 cross-compile).
+toomanyconfigs
+
+// DEV-005 — missingIncludeSystem (information)
+// Justification: System headers are resolved by the target toolchain sysroot,
+// not by cppcheck's host include path.
+missingIncludeSystem
+
+// DEV-006 — unmatchedSuppression (information)
+// Justification: Inline suppressions may be conditional on build configuration.
+unmatchedSuppression
+
+// DEV-007 — comparePointers (error class — inline-suppressed at specific lines only)
+// Justification: Reset_Handler subtracts linker-provided section boundary symbols
+// (__data_start/__data_end etc.). ISO C treats these as distinct objects, but the
+// linker script guarantees they bound one contiguous region. This is the canonical
+// ARM Cortex-M startup idiom. Suppressed INLINE at the five affected statements in
+// src/m7_rtos/os/startup_s32g_m7.c — never globally.

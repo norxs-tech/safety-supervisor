@@ -48,7 +48,12 @@ extern void SCB_InvalidateDCache_by_Addr(volatile void *addr, int32_t dsize);
 #define IPC_START_SEC_VAR_SHARED
 #include "MemMap.h"
 
+#ifdef UNIT_TEST_BUILD
 static volatile IPC_RingBufferType IPC_Buffers[IPC_NUM_CHANNELS];
+#else
+/* Target build: place in non-cached Shared SRAM visible to both A53 and M7 */
+static volatile IPC_RingBufferType IPC_Buffers[IPC_NUM_CHANNELS] SHARED_SRAM_ATTR;
+#endif
 
 #define IPC_STOP_SEC_VAR_SHARED
 #include "MemMap.h"
@@ -357,6 +362,38 @@ uint32 IPC_RingBuffer_GetCount(uint8 Channel)
     }
 
     return count;
+}
+
+/*=====================================================================================
+ * IPC_RingBuffer_ProtectFrame — producer-side E2E Profile 22 protection
+ *  Populates Frame->E2E_CRC / Frame->E2E_Counter using the channel-internal E2E
+ *  configuration, guaranteeing acceptance by the consumer-side check in Read.
+ *====================================================================================*/
+static E2E_P22ProtectStateType IPC_E2E_ProtectState[IPC_NUM_CHANNELS];
+
+IPC_ReturnType IPC_RingBuffer_ProtectFrame(
+    uint8                 Channel,
+    IPC_FrameType * const Frame)
+{
+    IPC_ReturnType retVal = IPC_E_PARAM;
+    uint8          e2eData[2U];
+
+    if ((Channel < IPC_NUM_CHANNELS) && (Frame != NULL_PTR))
+    {
+        e2eData[0U] = 0U;
+        e2eData[1U] = 0U;
+
+        if (E2E_P22Protect(&IPC_E2E_Config,
+                           &IPC_E2E_ProtectState[Channel],
+                           e2eData) == E_OK)
+        {
+            Frame->E2E_CRC     = (uint16)e2eData[0U];
+            Frame->E2E_Counter = (uint8)((e2eData[1U] >> 4U) & E2E_P22_COUNTER_MASK);
+            retVal             = IPC_OK;
+        }
+    }
+
+    return retVal;
 }
 
 #define IPC_STOP_SEC_CODE

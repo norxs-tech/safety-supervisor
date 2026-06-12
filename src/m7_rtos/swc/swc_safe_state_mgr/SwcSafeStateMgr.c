@@ -41,6 +41,7 @@
  */
 
 #include "Platform_Types.h"
+#include "SwcSafeStateMgr.h"
 #include "Rte_SafetyArbitrator.h"
 #include "Dem.h"
 #include "WdgM.h"

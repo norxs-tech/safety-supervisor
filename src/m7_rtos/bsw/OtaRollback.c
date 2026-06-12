@@ -47,6 +47,7 @@
 
 #include "Platform_Types.h"
 #include "Dem.h"
+#include "OtaRollback.h"
 
 
 /*=====================================================================================

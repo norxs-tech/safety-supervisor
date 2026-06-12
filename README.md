@@ -3,11 +3,18 @@
 
 **norxs Technology LLC** | Safety Engineering, Built from the Ground Up.
 
-[![CI](https://github.com/norxs-tech/autonomous-safety-supervisor/actions/workflows/ci.yml/badge.svg)](https://github.com/norxs-tech/autonomous-safety-supervisor/actions)
+[![CI](https://github.com/norxs-tech/safety-supervisor/actions/workflows/ci.yml/badge.svg)](https://github.com/norxs-tech/safety-supervisor/actions)
 [![License](https://img.shields.io/badge/license-norxs%20RI%20v1.0-blue)](LICENSE)
 [![Standard](https://img.shields.io/badge/standard-AUTOSAR%20R25--11-green)]()
 [![Safety](https://img.shields.io/badge/safety-ISO%2026262%20ASIL--D-red)]()
 [![MISRA](https://img.shields.io/badge/MISRA-C%3A2023-orange)]()
+[![Tests](https://img.shields.io/badge/unit%20tests-9%20passing%20(ASan%2BUBSan)-brightgreen)]()
+[![Coverage](https://img.shields.io/badge/line%20coverage-81.8%25%20(gate%20%E2%89%A580%25)-brightgreen)]()
+[![Traceability](https://img.shields.io/badge/SSR%20traceability-V--model-blue)](docs/SRS_TRACEABILITY.md)
+[![OpenChain](https://img.shields.io/badge/OpenChain-ISO%2FIEC%205230-blue)](docs/COMPLIANCE.md)
+[![Security Assurance](https://img.shields.io/badge/OpenChain-ISO%2FIEC%2018974-blue)](SECURITY.md)
+[![NIST CSF](https://img.shields.io/badge/NIST-CSF%202.0-purple)](docs/COMPLIANCE.md)
+[![SBOM](https://img.shields.io/badge/SBOM-SPDX%202.3-informational)](sbom/)
 
 ---
 
@@ -207,29 +214,53 @@ Key integration responsibilities (full list in `docs/HARA_ASS_SEooC_001.md` §7)
 
 ### M7 Safety Core (production)
 ```bash
-cmake -B build/m7 -DTARGET=M7 \
+cmake -B build/m7 -DNORXS_TARGET=M7 \
   -DCMAKE_C_COMPILER=arm-none-eabi-gcc \
+  -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY \
   -DCMAKE_OBJCOPY=arm-none-eabi-objcopy \
   -DCMAKE_SIZE=arm-none-eabi-size \
   -DCMAKE_BUILD_TYPE=Release
 cmake --build build/m7 -j$(nproc)
-# Outputs: build/m7/m7_safety_supervisor.elf / .hex / .map
+# Outputs: build/m7/m7_safety_supervisor.elf / .hex / .bin / .map
 ```
 
 ### A53 IDPS Daemon (QNX)
 ```bash
 source /path/to/qnx800/qnxsdp-env.sh
-cmake -B build/a53 -DTARGET=A53 \
+cmake -B build/a53 -DNORXS_TARGET=A53 \
   -DCMAKE_TOOLCHAIN_FILE=cmake/qnx_a53_toolchain.cmake
 cmake --build build/a53 -j$(nproc)
 ```
 
 ### Host-Native Unit Tests (CI / development)
 ```bash
-cmake -B build/test -DTARGET=TEST -DCMAKE_BUILD_TYPE=Debug
+cmake -B build/test -DNORXS_TARGET=TEST -DCMAKE_BUILD_TYPE=Debug
 cmake --build build/test -j$(nproc)
-ctest --test-dir build/test -V
+ctest --test-dir build/test -V --output-junit unit-test-report.xml
 ```
+
+All tests run under **AddressSanitizer + UndefinedBehaviorSanitizer**. The CI
+`unit-tests` job uploads the JUnit XML report and full ctest logs as the
+`unit-test-results` artifact on every run.
+
+| ctest case | Module under test | What it verifies |
+|---|---|---|
+| `crc16_ccitt_kat_test` | `bsw/e2e` | CRC-16/CCITT-FALSE known-answer vector `"123456789" → 0x29B1`; null/zero-length handling |
+| `e2e_profile5_test` | `bsw/e2e` | Protect/check round-trip; single-bit payload & CRC-field corruption detection; length bounds rejection |
+| `e2e_profile22_test` | `bsw/e2e` | Protect/check round-trip with DataID list; CRC corruption detection |
+| `e2e_null_rejection_test` | `bsw/e2e` | Defensive rejection of NULL Config/State/Status (CERT EXP34-C regression test) |
+| `ipc_ringbuffer_test` | `cdd/ipc_ringbuffer` | Full E2E-protected producer→consumer round-trip; empty/full boundary returns; parameter validation |
+| `asil_d_redundancy_test` | `Platform_Types.h` | Bitwise-inverse redundant storage detects single-bit upsets in either copy |
+| `wdgm_supervision_test` | `bsw/wdgm` | Alive supervision OK under nominal feed; FAILED on checkpoint starvation; deadline EXPIRED on 10ms > 8ms limit; SWT serviced via shadow registers |
+| `dem_diagnostics_test` | `bsw/dem` | 2-cycle debounce confirmation; ISO 14229-1 UDS status bits (TF/pendingDTC/confirmedDTC); invalid status & unknown event rejection |
+| `sbst_ram_march_test` | `os/Sbst.c` | RAM March C- passes on healthy RAM and leaves region zeroed; NULL/zero-length rejection; host-mode `Sbst_Run` |
+
+The `unit-tests` CI job additionally builds a gcov-instrumented variant and
+**gates line coverage at ≥ 80%** over the unit-tested modules (current: 81.8%
+line / 89.7% function, gcovr Cobertura XML uploaded as `coverage-report`).
+Requirement-level traceability (SSR → module → test → CI job) is maintained in
+**[docs/SRS_TRACEABILITY.md](docs/SRS_TRACEABILITY.md)**.
+
 
 ### Stack Usage Analysis
 ```bash
@@ -240,8 +271,12 @@ find build/m7 -name "*.su" | xargs cat | sort -t$'\t' -k2 -rn | head -20
 ### Static Analysis (MISRA C proxy)
 ```bash
 cppcheck --enable=all --error-exitcode=1 \
-  -I include/types -I src/m7_rtos/bsw/e2e \
-  --std=c11 src/m7_rtos/
+  --suppressions-list=tools/cppcheck_suppressions.txt --inline-suppr \
+  -I include/types -I src/m7_rtos/bsw -I src/m7_rtos/bsw/e2e \
+  --std=c11 src/m7_rtos/ src/qnx_a53/
+# Zero findings policy: error/warning level findings are never suppressed;
+# style-level deviations are documented in tools/cppcheck_suppressions.txt
+# (MISRA Compliance:2020 deviation-record format).
 ```
 
 ---
@@ -249,7 +284,7 @@ cppcheck --enable=all --error-exitcode=1 \
 ## Repository Structure
 
 ```
-autonomous-safety-supervisor/
+safety-supervisor/
 ├── include/types/
 │   └── Platform_Types.h          AUTOSAR R25-11 types + ASIL-D macros
 ├── src/
@@ -263,6 +298,11 @@ autonomous-safety-supervisor/
 │   │   │   └── OtaRollback.c     Dual-bank OTA rollback FSM
 │   │   ├── cdd/                  Complex Device Driver
 │   │   │   └── ipc_ringbuffer/   Lock-free cross-core SRAM ring buffer
+│   │   ├── os/                   Cortex-M7 startup, FFI, diagnostics, scheduler
+│   │   │   ├── startup_s32g_m7.c Vector table, FPU enable, Reset_Handler, fault→safe-state,
+│   │   │   │                     stack-canary hooks, release-counter scheduler w/ overrun DEM
+│   │   │   ├── Mpu_S32G_M7.c     PMSAv7 MPU: 6-region FFI map, PRIVDEFENA=0
+│   │   │   └── Sbst.c            Boot self-test: RAM March C-, vector table, FPU
 │   │   ├── rte/                  Runtime Environment (auto-generated)
 │   │   │   ├── Rte_SafetyArbitrator.h
 │   │   │   └── Rte_SafetyArbitrator_Stubs.c
@@ -273,15 +313,23 @@ autonomous-safety-supervisor/
 │   └── qnx_a53/
 │       └── app_idps/             Token Bucket IDPS daemon (UN R155)
 ├── tools/
-│   └── s32g_m7_safety.ld         GNU LD linker script (MPU region layout)
+│   ├── s32g_m7_safety.ld         GNU LD linker script (MPU region layout)
+│   ├── cppcheck_suppressions.txt Documented static-analysis deviation records
+│   └── generate_sbom.py          SPDX 2.3 SBOM generator
+├── sbom/
+│   └── safety-supervisor-*.spdx.json  Machine-readable SBOM (per-file checksums)
 ├── docs/
-│   └── HARA_ASS_SEooC_001.md     Hazard Analysis & Risk Assessment
+│   ├── HARA_ASS_SEooC_001.md     Hazard Analysis & Risk Assessment
+│   ├── SRS_TRACEABILITY.md       Software safety requirements ↔ code ↔ test matrix
+│   └── COMPLIANCE.md             OpenChain ISO 5230 / 18974 + NIST CSF 2.0 mapping
 ├── .github/
-│   ├── workflows/ci.yml          5-job CI: tests · M7 build · stack · lint · compliance
+│   ├── workflows/ci.yml          6-job CI: tests · M7 build · stack · lint · compliance · supply-chain
 │   ├── ISSUE_TEMPLATE/           Bug report template
 │   └── PULL_REQUEST_TEMPLATE.md
 ├── CMakeLists.txt                Multi-target build (M7 / A53 / TEST)
 ├── LICENSE                       norxs Reference Implementation License v1.0
+├── NOTICE                        Third-party & trademark notices (none bundled)
+├── SECURITY.md                   Coordinated vulnerability disclosure (ISO/IEC 18974)
 ├── CHANGELOG.md                  Full version history
 ├── CONTRIBUTING.md               Coding standards & contribution guide
 └── README.md                     This file
@@ -305,6 +353,35 @@ on the NXP S32G SoC.
 
 ---
 
+## Security & Supply-Chain Compliance
+
+This repository implements the norxs compliance program documented in
+**[docs/COMPLIANCE.md](docs/COMPLIANCE.md)**:
+
+- **OpenChain ISO/IEC 5230:2020 (license compliance)** — SPDX 2.3 SBOM with
+  per-file SHA-1/SHA-256 checksums under [`sbom/`](sbom/), `NOTICE`, per-file
+  copyright headers, and CI-enforced full-repository SBOM coverage. The codebase
+  has **zero third-party runtime dependencies**.
+- **OpenChain ISO/IEC 18974:2023 (security assurance)** — coordinated
+  vulnerability disclosure policy with triage SLAs in
+  [SECURITY.md](SECURITY.md); static analysis + ASan/UBSan gates on every commit.
+- **NIST Cybersecurity Framework 2.0** — Govern/Identify/Protect/Detect/
+  Respond/Recover mapping table in [docs/COMPLIANCE.md](docs/COMPLIANCE.md),
+  realized in code by E2E-protected IPC, CMAC frame authentication, IDPS
+  monitoring, FTTI-bounded safe-state response, and dual-bank OTA recovery.
+
+The CI job `supply-chain-compliance` fails the build if the SBOM does not
+catalogue every repository file, if any source file lacks the norxs copyright
+header, or if `SECURITY.md` / `NOTICE` / `LICENSE` are missing.
+
+To regenerate the SBOM after changing files:
+
+```bash
+python3 tools/generate_sbom.py 0.9.1
+```
+
+---
+
 ## Commercial Licensing & Services
 
 This reference implementation is published under the
@@ -318,7 +395,8 @@ Commercial use requires a separate license agreement.
 - ASPICE process documentation
 - Long-term engineering support and maintenance
 
-**Contact:** https://norxs.com
+**Contact:** https://www.norxs.com/ · contact@norxs.com
+
 ---
 
 ## Standards

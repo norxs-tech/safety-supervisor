@@ -1,0 +1,963 @@
+{
+  "spdxVersion": "SPDX-2.3",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "name": "norxs-safety-supervisor-0.9.2",
+  "documentNamespace": "https://www.norxs.com/spdx/safety-supervisor-0.9.2-3bb40722-d269-4f9c-bce5-adfa6c624fd7",
+  "creationInfo": {
+    "created": "2026-06-12T00:30:48Z",
+    "creators": [
+      "Organization: norxs Technology LLC",
+      "Tool: norxs-sbom-generator-1.0"
+    ],
+    "licenseListVersion": "3.23"
+  },
+  "documentDescribes": [
+    "SPDXRef-Package-SafetySupervisor"
+  ],
+  "packages": [
+    {
+      "name": "safety-supervisor",
+      "SPDXID": "SPDXRef-Package-SafetySupervisor",
+      "versionInfo": "0.9.2",
+      "supplier": "Organization: norxs Technology LLC",
+      "originator": "Organization: norxs Technology LLC",
+      "downloadLocation": "https://github.com/norxs-tech/safety-supervisor",
+      "homepage": "https://www.norxs.com/",
+      "filesAnalyzed": true,
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseDeclared": "LicenseRef-norxs-RI-1.0",
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved.",
+      "description": "AUTOSAR R25-11 ASIL-D SEooC Safety-Supervisor Gateway reference implementation for NXP S32G Cortex-M7. Zero third-party runtime dependencies.",
+      "primaryPackagePurpose": "FIRMWARE",
+      "hasFiles": [
+        "SPDXRef-File-000",
+        "SPDXRef-File-001",
+        "SPDXRef-File-002",
+        "SPDXRef-File-003",
+        "SPDXRef-File-004",
+        "SPDXRef-File-005",
+        "SPDXRef-File-006",
+        "SPDXRef-File-007",
+        "SPDXRef-File-008",
+        "SPDXRef-File-009",
+        "SPDXRef-File-010",
+        "SPDXRef-File-011",
+        "SPDXRef-File-012",
+        "SPDXRef-File-013",
+        "SPDXRef-File-014",
+        "SPDXRef-File-015",
+        "SPDXRef-File-016",
+        "SPDXRef-File-017",
+        "SPDXRef-File-018",
+        "SPDXRef-File-019",
+        "SPDXRef-File-020",
+        "SPDXRef-File-021",
+        "SPDXRef-File-022",
+        "SPDXRef-File-023",
+        "SPDXRef-File-024",
+        "SPDXRef-File-025",
+        "SPDXRef-File-026",
+        "SPDXRef-File-027",
+        "SPDXRef-File-028",
+        "SPDXRef-File-029",
+        "SPDXRef-File-030",
+        "SPDXRef-File-031",
+        "SPDXRef-File-032",
+        "SPDXRef-File-033",
+        "SPDXRef-File-034",
+        "SPDXRef-File-035",
+        "SPDXRef-File-036",
+        "SPDXRef-File-037",
+        "SPDXRef-File-038",
+        "SPDXRef-File-039",
+        "SPDXRef-File-040",
+        "SPDXRef-File-041",
+        "SPDXRef-File-042",
+        "SPDXRef-File-043",
+        "SPDXRef-File-044"
+      ],
+      "externalRefs": [
+        {
+          "referenceCategory": "OTHER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:github/norxs-tech/safety-supervisor@0.9.2"
+        }
+      ]
+    }
+  ],
+  "files": [
+    {
+      "fileName": "./.github/ISSUE_TEMPLATE/bug_report.md",
+      "SPDXID": "SPDXRef-File-000",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "9ebb7013129bd3cde14ccaf62b8bc6b462440536"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "5314ed479f27ff08e95ffa2bae9596c392abdca52b06e4ccc924ade4722352ea"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./.github/PULL_REQUEST_TEMPLATE.md",
+      "SPDXID": "SPDXRef-File-001",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "488759420ae9e06db9695c3f3f337fb6d527ad0c"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "ca229e5903fe6f65d94edfdd9bfcc997311fae8287f713a4d63f306f1d544de3"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./.github/workflows/ci.yml",
+      "SPDXID": "SPDXRef-File-002",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "45687439f5c907538be8ad2f9cf433883e150314"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "6cf405545ef347f81abdfc491f74f8b4d4f5200c4922e445e308fd107bfbebfa"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./.gitignore",
+      "SPDXID": "SPDXRef-File-003",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "a50113de96b17ec6c051c6370b2752f8ce0a57aa"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "8b273754512ec72bc37280c37da48b9241bd957d5b0f8e27c1f08f333e09485c"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./CHANGELOG.md",
+      "SPDXID": "SPDXRef-File-004",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "9b0b42b915e1c0667289c4d937d54c2efc67d238"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "9e2b962f6a76593535e68952717123586298ee5b3f9ab534acafe4982a0e36ff"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./CMakeLists.txt",
+      "SPDXID": "SPDXRef-File-005",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "8a3193c6729126cb063e0eac091097f78718b5af"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "a541960bc6fa597519d6d0b5979cacabc547f17ed3b4bfa636f2dbb296d4166a"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./CONTRIBUTING.md",
+      "SPDXID": "SPDXRef-File-006",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "2b0a968b12bd4f3af36e71767142f096fe9a2ccb"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "bbf0b837b564e761d68c1e1f795b3f88de2953a58072f6892b010b8b4f9b86cf"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./LICENSE",
+      "SPDXID": "SPDXRef-File-007",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "451822e2755dc580963c1c952d41d097b6710212"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "34e34af4ad14e36920bd7a256df770d18080e5df002c4b25ed1a1d6930c9cbf6"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./NOTICE",
+      "SPDXID": "SPDXRef-File-008",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "cb5f15aecb596bd7469a84b6f371dff22b397bab"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "410d8138e64c60f5dd3a63f4ef0079edb5fdfcf611fe7b1dfefa1fdd66c86a0d"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./README.md",
+      "SPDXID": "SPDXRef-File-009",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "f731a5dda68fe1b13a7dff09608990177a451371"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "069478b20cde43e3a0234b330039a5004ac5e51173e1a671c315dad64a1d160b"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./SECURITY.md",
+      "SPDXID": "SPDXRef-File-010",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "5c905c30d2727e5ae365251875f2ebf146466b97"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "07a28113a706ce06f7f84820402260777fe862527c8ca6884d88b2b6be96eef2"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./docs/COMPLIANCE.md",
+      "SPDXID": "SPDXRef-File-011",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "d4d2592b1cf8d66a144d218f59e0306549cda7d9"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "42d7b03b411662c71cb8aeed0a7ba88bc6b1cba1a2303cd019b521be425d404d"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./docs/HARA_ASS_SEooC_001.md",
+      "SPDXID": "SPDXRef-File-012",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "2a16cb9338fd1533afda0477782c2e79bfaf2655"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "88c032320df83f36b197afcc48bd2400d5df351f4fc00874b06bcbfd1cb9d7a2"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./docs/SRS_TRACEABILITY.md",
+      "SPDXID": "SPDXRef-File-013",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "6dbb35bc5635a5224b3c89a10db2d8e7ce557497"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "347535ce2216868400bd3b88a8e5eff62f3019a980775c8fc505b25d3908b77e"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./include/types/Platform_Types.h",
+      "SPDXID": "SPDXRef-File-014",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "4bc3b50f2505abe0c9131b107de01154cb5f2fb4"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "e08b55d34fcedc2641182e0f5eb0f74f9d583aefd8bad654b562def2ce1eb266"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./src/m7_rtos/bsw/OtaRollback.c",
+      "SPDXID": "SPDXRef-File-015",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "5249cdac50f202b6c32847bcc79075bc2c8f9711"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "2692fb0045df5e7667ceecd564575bad7f8fc471f91bf93611645bfe9814238a"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./src/m7_rtos/bsw/OtaRollback.h",
+      "SPDXID": "SPDXRef-File-016",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "66aed44f36eb16034ae177facde9a0d47e18b824"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "b8bb7d128cad6f2ff284b511fdee4afa8981fd54b7ff8cc0aa00abf5bc815092"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./src/m7_rtos/bsw/csm/Csm.c",
+      "SPDXID": "SPDXRef-File-017",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "248fb266e5cca464fc0d97f512718805ff028fe6"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "b0016c285685650c357f5fe814543cad817e29b579718a1588222f45c72bfc6b"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./src/m7_rtos/bsw/csm/Csm.h",
+      "SPDXID": "SPDXRef-File-018",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "fb16fb4db1c68dd5b035d977a5d0c950408234ef"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "da9b2728d4479ef11cbbc18555868f84250047ee6101221bf553fe8ea6d8f8cb"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./src/m7_rtos/bsw/dem/Dem.c",
+      "SPDXID": "SPDXRef-File-019",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "5708d61e156e2de91840a265ca5da20ba481153f"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "d482525b6b8830fe47d10845b4b09bcb636ef45fa5cb0633c4547cf9b759c3ab"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./src/m7_rtos/bsw/dem/Dem.h",
+      "SPDXID": "SPDXRef-File-020",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "8096a1482e3633c144d0d1c9ac03a575a72dba56"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "484a6a51376a7fb0705e4e71ce945112558f70320889489a376b7acf658a0680"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./src/m7_rtos/bsw/e2e/E2E.c",
+      "SPDXID": "SPDXRef-File-021",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "7d60d70cd6e35de0c238b3cadab7e0caf3580db2"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "d39ce189a7e54465c61357e966d9b36ed06b2d2f27471f0c9255ea4f8fed394b"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./src/m7_rtos/bsw/e2e/E2E.h",
+      "SPDXID": "SPDXRef-File-022",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "12b0a98af39a8980edfb8e3b3bae4027e41965b8"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "e73fe3a30a233e4d1a26c9d35203e5589cd6c3c04e91b685846dcc2505eb95f7"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./src/m7_rtos/bsw/memmap/MemMap.h",
+      "SPDXID": "SPDXRef-File-023",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "2976446d56e872255d35cd835207231e0eae4cf0"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "e74d85156fc00ad1d2135fc1dd058c176ff21effada392e5925f2f7ab1756e61"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./src/m7_rtos/bsw/wdgm/WdgM.c",
+      "SPDXID": "SPDXRef-File-024",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "a288689eec186f1372cddf1d949deb848c569fbf"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "64bab8fd37d2fa7f4aa082178b9f5e1d702c82f1ce76c4dec249b55b1012e24d"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./src/m7_rtos/bsw/wdgm/WdgM.h",
+      "SPDXID": "SPDXRef-File-025",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "e7170ec2a18c884ebec3ba8de1385c1599410a5d"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "277b386b43aecdcacaab898af15ea10eb7c4b02b9797a81546fda56770571068"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./src/m7_rtos/cdd/ipc_ringbuffer/IPC_RingBuffer.c",
+      "SPDXID": "SPDXRef-File-026",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "7e8aaa79a37e8da526190d3be03b66e6c277d26f"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "fe61c6319f7ab996c904806c9ab8e3904ab9cdf5beba5ae6446cbd4d59c83229"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./src/m7_rtos/cdd/ipc_ringbuffer/IPC_RingBuffer.h",
+      "SPDXID": "SPDXRef-File-027",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "db291fa297c453507ba6a30b37e260e7fb866bc0"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "4ff4e5d5a06fd03d778c91846a56a447b6c88705d54d03b72f27a0bf1df1d9e6"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./src/m7_rtos/os/Mpu_S32G_M7.c",
+      "SPDXID": "SPDXRef-File-028",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "ddb97446ab1d94ceba01ed315f23c52618844205"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "cacd18d90efe78e36c27118d7961bf8ffc88d09fecd033be31ecc8f353dfdad5"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./src/m7_rtos/os/Mpu_S32G_M7.h",
+      "SPDXID": "SPDXRef-File-029",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "389bf204dd1a243d3f2f5177b7d675f18e00a80c"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "581f5075ae6a142987e6a1d6404d47247fd85ce79ce48e6b7a5d62d6543b37ff"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./src/m7_rtos/os/Sbst.c",
+      "SPDXID": "SPDXRef-File-030",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "cc4461a93c4c397d96f964e5c8a6811a0d661e4b"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "b0a3bd4830da99be3a502aa87180acb665b4ad7d54955f2e7470f76ad6efbd21"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./src/m7_rtos/os/Sbst.h",
+      "SPDXID": "SPDXRef-File-031",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "1370493101b32fe2ae6cde37af48cf6754b49055"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "74cec35686bf981d5b5efc735118ad68031df34c2b499e32e3b8400f6c26084f"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./src/m7_rtos/os/startup_s32g_m7.c",
+      "SPDXID": "SPDXRef-File-032",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "1acacd7f02230b7d579e7394f516eebbbece2723"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "0c9519cbca382a7c90d0386b8a75bac895a138458b3608edb4ba53fedee54d9d"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./src/m7_rtos/rte/Rte_SafetyArbitrator.h",
+      "SPDXID": "SPDXRef-File-033",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "6b6ea6716fc130ded3651ea2b10b29e59669b332"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "8bc61bd8113fa4e4197d614a9e6768b0d42754883efeb8ccdde5432e7ced274a"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./src/m7_rtos/rte/Rte_SafetyArbitrator_Stubs.c",
+      "SPDXID": "SPDXRef-File-034",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "e3066dcb58e5e5a815412190e554b5cc3abdee7e"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "b88ba9ede1f67d9e1acb02b2d507c5290368ec13d8db0eabcdcaf85f407a8841"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./src/m7_rtos/swc/swc_safe_state_mgr/SwcSafeStateMgr.c",
+      "SPDXID": "SPDXRef-File-035",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "25d27598419f523a9f992627eddfdf01c3e1fc21"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "e708a0d51009ea68039f4cdae480e471b4e96d337c8a1e0f16cf1b73c1d6d497"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./src/m7_rtos/swc/swc_safe_state_mgr/SwcSafeStateMgr.h",
+      "SPDXID": "SPDXRef-File-036",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "769b57db0cfe531e14a7f239d8582f0264c9bac6"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "e349110bff8cf13924c7e766d7f3ac747c486e9d575b7077fdb02dfe0a3b18a9"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./src/m7_rtos/swc/swc_safety_arbitrator/SwcSafetyArbitrator.c",
+      "SPDXID": "SPDXRef-File-037",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "2234936acae573b22847d379751f931399c00285"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "eb929b2499821affa3c8b5fe7041f22cfb4ac26f068898bcddef20d8dede2f38"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./src/m7_rtos/swc/swc_vehicle_dynamics/SwcVehicleDynamics.c",
+      "SPDXID": "SPDXRef-File-038",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "a491fed623c5b4d4217c7044022a21464f16f850"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c5f7dad66b93b2c5adf0fd99517568397baa2601f0703124d21ac57fa158b7b1"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./src/m7_rtos/swc/swc_vehicle_dynamics/SwcVehicleDynamics.h",
+      "SPDXID": "SPDXRef-File-039",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "ff0f4cb352d4e3d101cd67b345b7ed307895018d"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "882ed067ce3f399928eca6fb33cc0a4d8a34282b2f62d803f3f7ebb9938bbfb6"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./src/qnx_a53/app_idps/app_idps.c",
+      "SPDXID": "SPDXRef-File-040",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "f798abf1a66a56a34a6c2ea74c5c2fcc4c1de251"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "9c4f08a5db699efb6d8677094fb2049d7f6ac7496d3d067d7d2346411ee50751"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./tests/test_main.c",
+      "SPDXID": "SPDXRef-File-041",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "ab825df8a42c7c18381ed3b94c4610e5f2b0b596"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "18357f2fad773f6601057f06b4c26ff739f987f5f4237a54d631a316cfe85979"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./tools/cppcheck_suppressions.txt",
+      "SPDXID": "SPDXRef-File-042",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "140031f9ed3eeb99c75cbc694d7f810f62292e0b"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "41bf15821a4cce414f20ba9a5344bf02efb8266f828e35fd53300677dbcb8830"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./tools/generate_sbom.py",
+      "SPDXID": "SPDXRef-File-043",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "55e027950d29582828a76fe3b45c9c8fffcb1f45"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "b5081e23ec53a5bf1192542836f749051205f5cdc6d0a79e27dc20029ea3f0f4"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    },
+    {
+      "fileName": "./tools/s32g_m7_safety.ld",
+      "SPDXID": "SPDXRef-File-044",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "a9ffc71e0e846425552624aa644247cb9d5a6462"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "9a6f51d782bb42da91ea1bed30085736fb160e8be09a7e1aef2e7630d7e02dc2"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-norxs-RI-1.0",
+      "licenseInfoInFiles": [
+        "LicenseRef-norxs-RI-1.0"
+      ],
+      "copyrightText": "Copyright (c) 2026 norxs Technology LLC. All rights reserved."
+    }
+  ],
+  "hasExtractedLicensingInfos": [
+    {
+      "licenseId": "LicenseRef-norxs-RI-1.0",
+      "name": "norxs Reference Implementation License v1.0",
+      "extractedText": "See LICENSE file in the repository root. Permits viewing, evaluation, citation with attribution, and contribution; commercial use requires a separate license agreement with norxs Technology LLC.",
+      "seeAlsos": [
+        "https://github.com/norxs-tech/safety-supervisor/blob/main/LICENSE"
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-DOCUMENT",
+      "relatedSpdxElement": "SPDXRef-Package-SafetySupervisor",
+      "relationshipType": "DESCRIBES"
+    }
+  ]
+}

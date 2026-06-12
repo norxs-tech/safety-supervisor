@@ -5,6 +5,150 @@ are documented here. This project follows [Semantic Versioning](https://semver.o
 
 ---
 
+## [0.9.2] — 2026-06-12
+
+### Fixed — Defects That Would Fail on Real Silicon
+
+- **FPU was never enabled.** The image is compiled `-mfloat-abi=hard` and the
+  SWCs use `sqrtf`/`atanf`, but `Reset_Handler` never granted CP10/CP11 access in
+  CPACR — on hardware, the first FP instruction raises UsageFault, whose handler
+  stops servicing the watchdog → permanent reset loop. CPACR is now enabled as
+  the very first action in `Reset_Handler` and re-verified by SBST (`SBST_E_FPU`).
+- **The MPU was claimed but never programmed.** Linker script, README, and docs
+  referenced "MPU-enforced regions" with zero MPU configuration code. New
+  `os/Mpu_S32G_M7.c` programs a 6-region PMSAv7 map mirroring the linker memory
+  map (ITCM execute/no-write, DTCM/SRAM RW+XN, Shared SRAM non-cacheable
+  shareable, calibration flash RO, peripherals device) with **PRIVDEFENA = 0** —
+  any access outside the map raises MemManage, routed to safe state. MemManage
+  is enabled as a dedicated fault (no HardFault escalation).
+- **Scheduler could silently skip activations.** The `tick % period` dispatch
+  lost task releases whenever the loop was delayed past a tick boundary. Replaced
+  with per-task release counters (wrap-safe signed comparison); missed releases
+  are now detected, reported as the new `DEM_EVENT_OS_TASK_OVERRUN`, and the
+  schedule re-synchronizes by whole periods without activation bursts.
+- **Stack-canary failure path led to newlib `_exit`** (an untimed spin). A
+  project-owned `__stack_chk_fail` now forces the hardware safe state via
+  watchdog expiry, and `__stack_chk_guard` is provided with a provisioning AoU
+  (HSE TRNG re-seed). Side effect: the newlib reent/stack-protector dependency
+  chain is no longer linked (−2.7KB text).
+
+### Added — Boot Diagnostics
+
+- **`os/Sbst.c`**: startup built-in self-test executed before any SWC init —
+  RAM March C- subset on a dedicated DTCM region (ISO 26262-5 Table D.1, ≈ 90%
+  stuck-at DC), vector table integrity (initial SP + thumb-bit reset vector via
+  the new `__isr_vector_start` linker symbol), and FPU-enabled check. A failed
+  self-test reports `DEM_EVENT_SBST_FAILURE` and never starts the scheduler.
+- DEM event catalogue grown 16 → 18 (`OS_TASK_OVERRUN`, `SBST_FAILURE`).
+
+### Added — Verification & Evidence
+
+- 9th unit test `sbst_ram_march_test` (March C- healthy pass + parameter
+  rejection + host-mode `Sbst_Run`).
+- **Coverage gate in CI**: gcov-instrumented build + gcovr, line coverage gated
+  at ≥ 80% over the unit-tested BSW/CDD/OS modules (measured 81.8% line, 89.7%
+  function); Cobertura XML uploaded as a CI artifact.
+- **`docs/SRS_TRACEABILITY.md`**: software safety requirements matrix —
+  24 SSR items traced requirement → ASIL → implementation → verification method
+  → CI job, with coverage summary and integrator AoU register.
+
+### Changed
+
+- CMake project version 0.9.2; `NORXS_COVERAGE` option for instrumented test
+  builds; cppcheck CI gate extended over `src/m7_rtos/os/`.
+
+---
+
+## [0.9.1] — 2026-06-12
+
+### Fixed — Safety-Relevant Defects
+
+- **`bsw/e2e`: corrected the CRC-16-CCITT lookup table.** The previous table was
+  internally consistent (protect/check round-trips passed) but did **not**
+  implement standard CRC-16/CCITT-FALSE behaviour — the known-answer vector
+  `"123456789"` produced `0x69F1` instead of `0x29B1`. Interoperability with any
+  standards-compliant peer (including the A53 `autosar-soa-gateway`) would have
+  failed on every frame. The table is regenerated from the reference bitwise
+  algorithm and locked in CI by `crc16_ccitt_kat_test`.
+- **`bsw/e2e`: fixed NULL-pointer dereference in `E2E_P5Check` / `E2E_P22Check`**
+  (CERT EXP34-C): when `Status == NULL_PTR` the error path still wrote
+  `*Status`. Regression-tested by `e2e_null_rejection_test` under ASan.
+- **`bsw/dem`: `Dem_SetEventStatus` returned `E_OK` for invalid status values**
+  (the `default` rejection branch was overwritten by a trailing assignment).
+  Status values are now validated before mutating the event entry.
+- **`rte`: missing prototypes for `Rte_Write_SafetyArbitrator_VehicleDynamics_Data`
+  and `Rte_UpdateAiCommandFromIpc`** caused implicit function declarations in
+  `SwcVehicleDynamics.c`. Prototypes added to `Rte_SafetyArbitrator.h`.
+- **`rte`: volatile qualifiers no longer cast away** when reading inter-runnable
+  variables (3 sites).
+- **`tools/s32g_m7_safety.ld`: added `__ssm_bss_start/end` symbols** — the Safe
+  State Manager NOLOAD BSS section had no boundary symbols, so startup could not
+  zero it (uninitialized FSM state on cold boot).
+
+### Added — OS Layer (new)
+
+- **`src/m7_rtos/os/startup_s32g_m7.c`**: ARMv7-M vector table, `Reset_Handler`
+  (.data copy + .bss and MPU-isolated SWC BSS zeroing), fault handlers that
+  force safe state via watchdog expiry, SysTick 1ms OS tick, and a static cyclic
+  scheduler (5ms WdgM / 10ms safety chain / 100ms diagnostics + OTA) with
+  run-to-completion semantics meeting the 20ms FTTI argument. The M7 ELF
+  previously linked with **zero text bytes** (no entry symbol; all code
+  garbage-collected) — it now produces a real 10.7KB ITCM image.
+- CMSIS-equivalent `SCB_CleanDCache_by_Addr` / `SCB_InvalidateDCache_by_Addr`
+  implementations (previously declared `extern` but provided nowhere).
+- IPC buffers are now actually placed in the A53-visible **Shared SRAM** section
+  via `SHARED_SRAM_ATTR` on target builds (previously landed in DTCM `.bss`).
+
+### Added — API
+
+- `IPC_RingBuffer_ProtectFrame()`: producer-side E2E Profile 22 protection.
+  Previously no public API could construct a frame the consumer-side E2E check
+  would accept (the DataID list is channel-private).
+- `Dem_GetEventUdsStatus()`: ISO 14229-1 §11.2.1 composite status readout (UDS
+  service $19 support) with AUTOSAR SWS traceability tag.
+- `OtaRollback.h` and `SwcSafeStateMgr.h`: public headers for previously
+  prototype-less modules.
+
+### Added — Verification
+
+- Unit-test suite expanded from 3 to **8 ctest cases** (CRC known-answer,
+  corruption-detection negatives, full IPC round-trip with boundary conditions,
+  ASIL-D redundancy macro upset detection, WdgM alive/deadline supervision, DEM
+  debounce + UDS bits). All run under ASan + UBSan; JUnit XML report uploaded as
+  a CI artifact.
+- `bsw/wdgm` is now host-testable through a `UNIT_TEST_BUILD` SWT register shadow.
+- Fixed `ASIL_D_SET` macro: the inverse copy is derived from the stored variable
+  (type-correct on any host word size).
+
+### Added — Supply-Chain & Security Compliance
+
+- **`SECURITY.md`** — coordinated vulnerability disclosure policy with triage
+  SLAs (OpenChain ISO/IEC 18974:2023, NIST SP 800-216 aligned).
+- **`sbom/safety-supervisor-0.9.1.spdx.json`** — SPDX 2.3 SBOM cataloguing every
+  repository file with SHA-1/SHA-256 checksums; generator at
+  `tools/generate_sbom.py`.
+- **`NOTICE`** — third-party and trademark notices (zero bundled third-party code).
+- **`docs/COMPLIANCE.md`** — OpenChain ISO/IEC 5230 & 18974 requirement mapping
+  and NIST CSF 2.0 function-by-function implementation table.
+- **CI Job 6 `supply-chain-compliance`** — fails the build on missing compliance
+  artifacts, incomplete SBOM coverage, or missing copyright headers.
+
+### Changed — Build & CI
+
+- Removed all five `-Wno-error=` downgrades: the M7 target now genuinely builds
+  with the full `-Werror` wall (`-Wmissing-prototypes -Wcast-qual -Wconversion
+  -Wshadow -Wredundant-decls …`) with **zero warnings**.
+- `tests/test_main.c` (hosted stdio code) removed from the freestanding M7
+  production image source list.
+- M7 executable now carries the `.elf` suffix; `.hex`/`.bin` added to CI
+  artifacts; `arm-none-eabi-size` step path corrected.
+- cppcheck gate now covers `src/qnx_a53/` and uses a documented deviation-record
+  suppression list (`tools/cppcheck_suppressions.txt`) — error/warning level
+  findings are never suppressed.
+- Build documentation corrected: configuration flag is `-DNORXS_TARGET=…`.
+
+---
+
 ## [0.9.0-RC1] — 2026-06-01
 
 ### Initial public release — norxs Technology LLC

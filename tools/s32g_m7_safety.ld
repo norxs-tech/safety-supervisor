@@ -57,6 +57,7 @@ SECTIONS
      *------------------------------------------------------------------*/
     .vectors :
     {
+        __isr_vector_start = .;
         KEEP(*(.isr_vector))
     } > M7_ITCM
 
@@ -144,9 +145,11 @@ SECTIONS
     .safe_state_mgr_bss (NOLOAD) :
     {
         . = ALIGN(32);
+        __ssm_bss_start = .;
         *SwcSafeStateMgr.o(.bss*)
         *SwcSafeStateMgr.o(COMMON)
         . = ALIGN(32);
+        __ssm_bss_end = .;
     } > M7_DTCM
 
     /*------------------------------------------------------------------
@@ -230,6 +233,10 @@ SECTIONS
      * Heap (not used — MISRA C:2023 prohibits dynamic allocation)
      *------------------------------------------------------------------*/
     __heap_size = 0x0;
+    HEAP_SIZE   = 0x0;
+    /* 'end' required by libnosys _sbrk stub; heap size is zero so any
+       dynamic allocation attempt fails immediately at the stack limit. */
+    PROVIDE(end = __stack_limit);
 
     /*------------------------------------------------------------------
      * Debug symbols

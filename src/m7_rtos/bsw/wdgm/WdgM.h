@@ -52,6 +52,10 @@ typedef uint16 WdgM_CheckpointIdType;
 #define WDGM_CP_SSM_INTERPOLATION     ((WdgM_CheckpointIdType)0x0022U)
 #define WDGM_CP_SSM_EXIT              ((WdgM_CheckpointIdType)0x0023U)
 
+/* IPC handler checkpoints (scheduler-level supervised entity) */
+#define WDGM_CP_IPC_RX                ((WdgM_CheckpointIdType)0x0031U)
+#define WDGM_CP_IPC_TX                ((WdgM_CheckpointIdType)0x0032U)
+
 /*=====================================================================================
  * WdgM Global Status
  *====================================================================================*/

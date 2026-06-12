@@ -1,0 +1,27 @@
+norxs Autonomous Safety-Supervisor Gateway (SEooC)
+Copyright (c) 2026 norxs Technology LLC. All rights reserved.
+
+This product is published by norxs Technology LLC (https://www.norxs.com/)
+under the norxs Reference Implementation License v1.0 (see LICENSE).
+
+Third-party software notice
+---------------------------
+This repository contains NO third-party source code and has NO third-party
+runtime dependencies. All source files are original works of norxs Technology
+LLC. A machine-readable Software Bill of Materials (SPDX 2.3) is maintained
+under sbom/ and validated in continuous integration.
+
+Build- and test-time tooling (not distributed with, nor linked into, this
+software) includes: GNU Arm Embedded Toolchain (GPL-3.0-with-GCC-exception,
+newlib licenses), CMake (BSD-3-Clause), Ninja (Apache-2.0), cppcheck
+(GPL-3.0-or-later), and GitHub Actions runner images. These tools process the
+software but no portion of them is incorporated into the delivered artifacts
+beyond standard compiler runtime support libraries (libgcc/newlib) under their
+respective linking exceptions.
+
+Trademark notice
+----------------
+AUTOSAR is a registered trademark of the AUTOSAR Development Partnership.
+NXP and S32G are trademarks of NXP B.V. QNX is a trademark of BlackBerry
+Limited. Use of these names is for identification and interoperability
+description only and does not imply endorsement.

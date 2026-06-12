@@ -34,7 +34,14 @@
 #define S32G_SWT_SERVICE_KEY2         (0xB480U)  /**< Second service word            */
 #define S32G_SWT_TIMEOUT_VALUE        (0x000F4240UL) /**< ~50ms at 200MHz SWT clock  */
 
+#ifdef UNIT_TEST_BUILD
+/* Host-native unit tests: shadow the SWT register file in plain RAM so the
+ * supervision logic can be exercised on x86_64 without MMIO access faults.   */
+static volatile uint32 WdgM_SwtShadowRegs[8U];
+#define SWT_REG32(base, offset)       (WdgM_SwtShadowRegs[((offset) >> 2U) & 0x07U])
+#else
 #define SWT_REG32(base, offset)       (*((volatile uint32 *)((base) + (offset))))
+#endif
 
 /*=====================================================================================
  * Alive Supervision State (per supervised entity)

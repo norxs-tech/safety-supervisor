@@ -27,7 +27,7 @@
 cmake_minimum_required(VERSION 3.26 FATAL_ERROR)
 
 project(AutonomousSafetySupervisor
-    VERSION 0.9.0
+    VERSION 0.9.2
     DESCRIPTION "norxs SEooC Safety-Supervisor Gateway — AUTOSAR R25-11 ASIL-D"
     LANGUAGES C
 )
@@ -58,6 +58,7 @@ set(COMMON_C_FLAGS
 if(NORXS_TARGET STREQUAL "M7" OR NOT DEFINED NORXS_TARGET)
 
     add_executable(m7_safety_supervisor)
+    set_target_properties(m7_safety_supervisor PROPERTIES SUFFIX ".elf")
 
     target_sources(m7_safety_supervisor PRIVATE
         # BSW
@@ -69,7 +70,11 @@ if(NORXS_TARGET STREQUAL "M7" OR NOT DEFINED NORXS_TARGET)
 
         # CDD
         src/m7_rtos/cdd/ipc_ringbuffer/IPC_RingBuffer.c
-        tests/test_main.c
+
+        # OS — startup, MPU, self-test, cyclic scheduler
+        src/m7_rtos/os/startup_s32g_m7.c
+        src/m7_rtos/os/Mpu_S32G_M7.c
+        src/m7_rtos/os/Sbst.c
 
         # RTE
         src/m7_rtos/rte/Rte_SafetyArbitrator_Stubs.c
@@ -82,6 +87,7 @@ if(NORXS_TARGET STREQUAL "M7" OR NOT DEFINED NORXS_TARGET)
 
     target_include_directories(m7_safety_supervisor PRIVATE
         include/types
+        src/m7_rtos/bsw
         src/m7_rtos/bsw/e2e
         src/m7_rtos/bsw/dem
         src/m7_rtos/bsw/wdgm
@@ -92,6 +98,7 @@ if(NORXS_TARGET STREQUAL "M7" OR NOT DEFINED NORXS_TARGET)
         src/m7_rtos/swc/swc_safety_arbitrator
         src/m7_rtos/swc/swc_vehicle_dynamics
         src/m7_rtos/swc/swc_safe_state_mgr
+        src/m7_rtos/os
     )
 
     target_compile_options(m7_safety_supervisor PRIVATE
@@ -117,13 +124,6 @@ if(NORXS_TARGET STREQUAL "M7" OR NOT DEFINED NORXS_TARGET)
         -Wnull-dereference
         -Wshadow
         -Wredundant-decls
-        # Downgrade these 5 warnings from error to warning for CI.
-        # The code needs systematic cleanup; re-promote once fixed.
-        -Wno-error=missing-prototypes
-        -Wno-error=redundant-decls
-        -Wno-error=cast-qual
-        -Wno-error=unused-variable
-        -Wno-error=implicit-function-declaration
         # AUTOSAR compliance
         -DAUTOSAR_R25_11
         -DISO_26262_ASIL_D
@@ -137,12 +137,15 @@ if(NORXS_TARGET STREQUAL "M7" OR NOT DEFINED NORXS_TARGET)
         -mfpu=fpv5-d16
         -mfloat-abi=hard
         -nostartfiles
+        --specs=nosys.specs   # newlib syscall stubs (_exit, _sbrk, ...) for libm/SSP
         -Wl,--gc-sections
         -Wl,-Map=${CMAKE_BINARY_DIR}/m7_safety_supervisor.map
         -Wl,--print-memory-usage
         -Wl,--no-warn-rwx-segments
-        -lm                    # libm for sqrtf, atanf (ASIL-B sufficiency)
     )
+
+    # libm for sqrtf / atanf — must follow object files in link order
+    target_link_libraries(m7_safety_supervisor PRIVATE m)
 
     # Generate HEX and BIN outputs for flash programming
     add_custom_command(TARGET m7_safety_supervisor POST_BUILD
@@ -206,31 +209,52 @@ if(NORXS_TARGET STREQUAL "TEST")
 
     add_executable(unit_tests
         src/m7_rtos/bsw/e2e/E2E.c
+        src/m7_rtos/bsw/wdgm/WdgM.c
+        src/m7_rtos/bsw/dem/Dem.c
         src/m7_rtos/cdd/ipc_ringbuffer/IPC_RingBuffer.c
+        src/m7_rtos/os/Sbst.c
         tests/test_main.c
     )
 
     target_include_directories(unit_tests PRIVATE
         include/types
+        src/m7_rtos/bsw
         src/m7_rtos/bsw/e2e
+        src/m7_rtos/bsw/wdgm
+        src/m7_rtos/bsw/dem
         src/m7_rtos/bsw/memmap
         src/m7_rtos/cdd/ipc_ringbuffer
+        src/m7_rtos/os
     )
 
     target_compile_options(unit_tests PRIVATE
         -std=c11
         -O0
         -g3
+        -Wall
+        -Wextra
         -fsanitize=address,undefined
         -DUNIT_TEST_BUILD
     )
+
+    option(NORXS_COVERAGE "Instrument unit tests for gcov line coverage" OFF)
+    if(NORXS_COVERAGE)
+        target_compile_options(unit_tests PRIVATE --coverage)
+        target_link_options(unit_tests PRIVATE --coverage)
+    endif()
 
     target_link_options(unit_tests PRIVATE
         -fsanitize=address,undefined
     )
 
-    add_test(NAME e2e_profile5_test   COMMAND unit_tests --e2e-p5)
-    add_test(NAME e2e_profile22_test  COMMAND unit_tests --e2e-p22)
-    add_test(NAME ipc_ringbuffer_test COMMAND unit_tests --ipc)
+    add_test(NAME crc16_ccitt_kat_test     COMMAND unit_tests --crc-kat)
+    add_test(NAME e2e_profile5_test        COMMAND unit_tests --e2e-p5)
+    add_test(NAME e2e_profile22_test       COMMAND unit_tests --e2e-p22)
+    add_test(NAME e2e_null_rejection_test  COMMAND unit_tests --e2e-null)
+    add_test(NAME ipc_ringbuffer_test      COMMAND unit_tests --ipc)
+    add_test(NAME asil_d_redundancy_test   COMMAND unit_tests --asild)
+    add_test(NAME wdgm_supervision_test    COMMAND unit_tests --wdgm)
+    add_test(NAME dem_diagnostics_test     COMMAND unit_tests --dem)
+    add_test(NAME sbst_ram_march_test      COMMAND unit_tests --sbst)
 
 endif()

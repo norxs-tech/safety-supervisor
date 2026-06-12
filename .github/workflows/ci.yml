@@ -20,7 +20,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y cmake ninja-build gcc clang
+          sudo apt-get install -y cmake ninja-build gcc clang gcovr
 
       - name: Configure (TEST target)
         run: |
@@ -32,14 +32,47 @@ jobs:
         run: cmake --build build/test --parallel
 
       - name: Run tests
-        run: ctest --test-dir build/test -V --output-on-failure
+        run: |
+          ctest --test-dir build/test -V --output-on-failure \
+            --output-junit unit-test-report.xml
 
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: unit-test-results
-          path: build/test/
+          path: |
+            build/test/unit-test-report.xml
+            build/test/Testing/
+
+      - name: Build with coverage instrumentation
+        run: |
+          cmake -B build/cov -DNORXS_TARGET=TEST \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DNORXS_COVERAGE=ON \
+            -G Ninja
+          cmake --build build/cov --parallel
+          ctest --test-dir build/cov --output-on-failure
+
+      - name: Coverage report (gate ≥ 80% line on tested BSW/CDD/OS modules)
+        run: |
+          gcovr --root . \
+            --filter 'src/m7_rtos/bsw/e2e/' \
+            --filter 'src/m7_rtos/bsw/wdgm/' \
+            --filter 'src/m7_rtos/bsw/dem/' \
+            --filter 'src/m7_rtos/cdd/ipc_ringbuffer/' \
+            --filter 'src/m7_rtos/os/Sbst.c' \
+            --object-directory build/cov \
+            --print-summary \
+            --xml coverage.xml --xml-pretty \
+            --fail-under-line 80
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml
 
   # ============================================================================
   # Job 2: M7 Cross-Compile (ARM Cortex-M7, -Werror)
@@ -71,14 +104,16 @@ jobs:
         run: cmake --build build/m7 --parallel
 
       - name: Show memory usage
-        run: arm-none-eabi-size build/m7/m7_safety_supervisor
+        run: arm-none-eabi-size build/m7/m7_safety_supervisor.elf
 
-      - name: Upload ELF artifact
+      - name: Upload firmware artifacts
         uses: actions/upload-artifact@v4
         with:
           name: m7-safety-supervisor-elf
           path: |
             build/m7/m7_safety_supervisor.elf
+            build/m7/m7_safety_supervisor.hex
+            build/m7/m7_safety_supervisor.bin
             build/m7/m7_safety_supervisor.map
           retention-days: 30
 
@@ -145,15 +180,15 @@ jobs:
       - name: Install cppcheck
         run: sudo apt-get install -y cppcheck
 
-      - name: Run cppcheck on M7 safety sources
+      - name: Run cppcheck on M7 + A53 sources
         run: |
           cppcheck \
             --enable=all \
             --error-exitcode=1 \
-            --suppress=missingIncludeSystem \
-            --suppress=unmatchedSuppression \
+            --suppressions-list=tools/cppcheck_suppressions.txt \
             --inline-suppr \
             -I include/types \
+            -I src/m7_rtos/bsw \
             -I src/m7_rtos/bsw/e2e \
             -I src/m7_rtos/bsw/dem \
             -I src/m7_rtos/bsw/wdgm \
@@ -161,9 +196,11 @@ jobs:
             -I src/m7_rtos/bsw/memmap \
             -I src/m7_rtos/cdd/ipc_ringbuffer \
             -I src/m7_rtos/rte \
+            -I src/m7_rtos/os \
             -I src/m7_rtos/swc/swc_vehicle_dynamics \
+            -I src/m7_rtos/swc/swc_safe_state_mgr \
             --std=c11 \
-            src/m7_rtos/ \
+            src/m7_rtos/ src/qnx_a53/ \
             2>&1 | tee cppcheck_report.txt
 
       - name: Upload cppcheck report
@@ -216,11 +253,14 @@ jobs:
         run: |
           FAIL=0
           for f in include/types/*.h \
+                   src/m7_rtos/bsw/*.h src/m7_rtos/bsw/*.c \
                    src/m7_rtos/bsw/e2e/*.h src/m7_rtos/bsw/e2e/*.c \
                    src/m7_rtos/bsw/wdgm/*.h src/m7_rtos/bsw/wdgm/*.c \
                    src/m7_rtos/bsw/dem/*.h src/m7_rtos/bsw/dem/*.c \
                    src/m7_rtos/bsw/csm/*.h src/m7_rtos/bsw/csm/*.c \
                    src/m7_rtos/cdd/ipc_ringbuffer/*.h \
+                   src/m7_rtos/os/*.c \
+                   src/m7_rtos/swc/swc_safe_state_mgr/*.h \
                    src/m7_rtos/swc/swc_vehicle_dynamics/*.h; do
             [ ! -f "$f" ] && continue
             for tag in "@file" "@brief" "@author" "@copyright" "@standards"; do
@@ -232,3 +272,103 @@ jobs:
           done
           if [ "$FAIL" -eq 0 ]; then echo "All Doxygen headers complete."; fi
           if [ "$FAIL" -ne 0 ]; then exit 1; fi
+
+  # ============================================================================
+  # Job 6: Supply-Chain Compliance (OpenChain ISO/IEC 5230 & 18974, NIST CSF)
+  # ============================================================================
+  supply-chain-compliance:
+    name: Supply-Chain Compliance (ISO 5230 / ISO 18974 / NIST CSF)
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify compliance artifacts exist (ISO 5230 §3.4, ISO 18974 §3.4)
+        run: |
+          FAIL=0
+          for f in LICENSE NOTICE SECURITY.md docs/COMPLIANCE.md; do
+            if [ ! -f "$f" ]; then
+              echo "MISSING compliance artifact: $f"
+              FAIL=1
+            else
+              echo "OK: $f"
+            fi
+          done
+          if [ "$FAIL" -ne 0 ]; then exit 1; fi
+
+      - name: Validate SPDX SBOM (schema basics + full file coverage)
+        run: |
+          python3 << 'PYEOF'
+          import json, os, sys
+
+          sbom_dir = "sbom"
+          sboms = [f for f in os.listdir(sbom_dir) if f.endswith(".spdx.json")]
+          if not sboms:
+              print("ERROR: no SPDX SBOM found under sbom/")
+              sys.exit(1)
+          path = os.path.join(sbom_dir, sorted(sboms)[-1])
+          with open(path) as f:
+              doc = json.load(f)
+
+          assert doc.get("spdxVersion") == "SPDX-2.3", "spdxVersion must be SPDX-2.3"
+          assert doc.get("SPDXID") == "SPDXRef-DOCUMENT", "missing SPDXRef-DOCUMENT"
+          pkgs = doc.get("packages", [])
+          assert pkgs and pkgs[0]["name"] == "safety-supervisor", "package missing"
+          catalogued = {e["fileName"][2:] if e["fileName"].startswith("./") else e["fileName"] for e in doc.get("files", [])}
+          assert catalogued, "SBOM contains no file entries"
+
+          # Every repository file must be catalogued (ISO 5230 §3.3 BOM process)
+          skip = {"build", ".git", "sbom"}
+          missing = []
+          for dirpath, dirnames, filenames in os.walk("."):
+              dirnames[:] = [d for d in dirnames if d not in skip]
+              for fn in filenames:
+                  rel = os.path.relpath(os.path.join(dirpath, fn), ".").replace(os.sep, "/")
+                  if rel not in catalogued:
+                      missing.append(rel)
+          if missing:
+              print("ERROR: files not catalogued in SBOM "
+                    "(run: python3 tools/generate_sbom.py and commit):")
+              for m in missing:
+                  print("  -", m)
+              sys.exit(1)
+          print(f"SBOM OK: {path} catalogues {len(catalogued)} files, "
+                f"repository fully covered.")
+          PYEOF
+
+      - name: Verify per-file copyright headers (ISO 5230 §3.1.5)
+        run: |
+          FAIL=0
+          while IFS= read -r f; do
+            if ! grep -q "norxs Technology LLC" "$f"; then
+              echo "Missing norxs copyright in: $f"
+              FAIL=1
+            fi
+          done < <(find include/ src/ tests/ -name "*.c" -o -name "*.h")
+          if [ "$FAIL" -eq 0 ]; then
+            echo "All source files carry norxs copyright."
+          else
+            exit 1
+          fi
+
+      - name: Verify SECURITY.md content (ISO 18974 §3.2.1 contact + SLAs)
+        run: |
+          for needle in "contact@norxs.com" "Coordinated Disclosure" "CVSS"; do
+            if ! grep -q "$needle" SECURITY.md; then
+              echo "SECURITY.md missing required element: $needle"
+              exit 1
+            fi
+          done
+          echo "SECURITY.md contains contact channel and disclosure SLAs."
+
+      - name: Upload compliance evidence bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: compliance-evidence
+          path: |
+            sbom/
+            SECURITY.md
+            NOTICE
+            LICENSE
+            docs/COMPLIANCE.md
+          retention-days: 90

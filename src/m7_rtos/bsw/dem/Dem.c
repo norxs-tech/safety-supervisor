@@ -32,7 +32,7 @@
 /*=====================================================================================
  * DEM Configuration Constants
  *====================================================================================*/
-#define DEM_MAX_EVENTS              (16U) /**< Total registered DTC events              */
+#define DEM_MAX_EVENTS              (18U) /**< Total registered DTC events              */
 #define DEM_FAULT_CONFIRM_THRESHOLD (2U)  /**< PREFAILED cycles before FAILED confirm   */
 #define DEM_PASS_CONFIRM_THRESHOLD  (3U)  /**< PASSED cycles before event cleared       */
 #define DEM_NVM_BLOCK_ID            (0x0010U) /**< NvM block ID for DTC storage         */
@@ -99,6 +99,8 @@ static Dem_EventTableEntry Dem_EventTable[DEM_MAX_EVENTS] =
     { DEM_EVENT_WDGM_DEADLINE_FAIL,          DEM_EVENT_STATUS_PASSED, 0U, 0U, 0U, FALSE, FALSE },
     { DEM_EVENT_CSM_MAC_VERIFICATION_FAIL,   DEM_EVENT_STATUS_PASSED, 0U, 0U, 0U, FALSE, FALSE },
     { DEM_EVENT_CSM_KEY_EXPIRED,             DEM_EVENT_STATUS_PASSED, 0U, 0U, 0U, FALSE, FALSE },
+    { DEM_EVENT_OS_TASK_OVERRUN,             DEM_EVENT_STATUS_PASSED, 0U, 0U, 0U, FALSE, FALSE },
+    { DEM_EVENT_SBST_FAILURE,                DEM_EVENT_STATUS_PASSED, 0U, 0U, 0U, FALSE, FALSE },
 };
 
 static Dem_FreezeFrameStorage Dem_FreezeFrames[DEM_MAX_FREEZE_FRAMES];
@@ -200,8 +202,9 @@ Std_ReturnType Dem_SetEventStatus(
 
     entry = Dem_FindEvent(EventId);
 
-    if (entry != NULL_PTR)
+    if ((entry != NULL_PTR) && (EventStatus <= DEM_EVENT_STATUS_PREFAILED))
     {
+        retVal = E_OK;
         entry->CurrentStatus = EventStatus;
 
         switch (EventStatus)
@@ -271,8 +274,6 @@ Std_ReturnType Dem_SetEventStatus(
                 break;
             }
         }
-
-        retVal = E_OK;
     }
 
     return retVal;
@@ -345,6 +346,30 @@ Std_ReturnType Dem_ReportErrorStatus(
 {
     /* ReportErrorStatus is a thin wrapper per AUTOSAR R25-11 SWS_Dem_00589 */
     return Dem_SetEventStatus(EventId, EventStatus);
+}
+
+/*=====================================================================================
+ * Dem_GetEventUdsStatus — ISO 14229-1 §11.2.1 statusOfDTC readout (UDS $19)
+ *====================================================================================*/
+Std_ReturnType Dem_GetEventUdsStatus(
+    Dem_EventIdType   EventId,
+    uint8     * const UdsStatus)
+{
+    Std_ReturnType             retVal = E_NOT_OK;
+    const Dem_EventTableEntry *entry;
+
+    if (UdsStatus != NULL_PTR)
+    {
+        entry = Dem_FindEvent(EventId);
+
+        if (entry != NULL_PTR)
+        {
+            *UdsStatus = entry->UdsStatusByte;
+            retVal     = E_OK;
+        }
+    }
+
+    return retVal;
 }
 
 #define DEM_STOP_SEC_CODE
